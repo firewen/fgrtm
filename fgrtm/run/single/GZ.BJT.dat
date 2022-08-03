@@ -1,0 +1,50 @@
+FOR :  receiver information: rarray case:
+
+47.312870           -- x0(km)
+-104.252274         -- y0(km)
+ 10.50000           -- z0(km)
+
+FOR :  input data for double-couple source:
+
+ 0 1e7         --    M0 (dyne cm)
+ 0 
+ 90 30 33      -- mxx,myy,mzz,mxy,mxz,myz / dip, rake, str
+ 0.0           --   xs(km) 
+ 0.0           --   ys(km) 
+10             --   zs(km) 
+
+FOR :  basic control parameters & source parameters
+
+(1). Basic control parameters:
+ 11         !--    m     : NT=2**m   ( max(m)=11 )
+102.35      !--   Twin   : time window (second)
+
+(3). Source spectral parameters:
+Triangle      !-- Type_STF :type of source-time function, 'Triangle','Ricker', 
+                      : 'SSTEP', 'Exp', 'Green','Bouchon','Trapezoid','B(shift)'
+0.5       !--    tou   : rise time  (second)
+0.0       !--   shift  : time shift (second)
+60.       !--    fc    : center frequency (Hz)
+
+(4). Window swith and parameters:
+OFF       !--WinSwitch : 'ON'--use filter, 'OFF'--do not use filter
+Hamming   !-- WinType  : 'Hamming'--Hamming filter, 'Butter'--???
+0.01      !-- f1 (Hz)
+0.07      !-- f2 (Hz)
+96.50     !-- f3 (Hz)
+99.30     !-- f4 (Hz)
+
+(5). Output Format:
+GZ.BJT       !-- prefix for output filename
+
+FOR :   multi-layered media model
+Number of total layers:
+7
+Layer #   depth(km)   Densities(g/cm3)  S-Velocity(km/s) P-velocity(km/s) Qs-values  Qp-values
+1 0.00 2.10 1.79 3.42 600 850
+2 1.01 2.40 2.54 4.32 600 850
+3 3.02 2.60 3.52 6.10 600 850
+4 18.03 2.80 3.83 6.35 600 850
+5 28.04 2.95 3.97 6.75 600 850
+6 38.05 2.99 4.05 7.00 600 850
+7 42.06 3.32 4.52 8.15 600 850
