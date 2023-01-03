@@ -24,7 +24,7 @@ module raytracing
     ! for refract wave
     call refract(vmodel,r0,sdep,wtype,pn,antime,inflag)
     ! for reflect wave
-    !call reflect(vmodel,r0,sdep,wtype,pr,artime,irflag)
+    call reflect(vmodel,r0,sdep,wtype,pr,artime,irflag)
     
     !print *, 'Direct wave :' , atime,'Reflected wave :',artime,'Refracted wave :',antime
     
@@ -43,23 +43,20 @@ module raytracing
     
     end subroutine ray_out
     
-    subroutine model_info(modeldata,vmodel)
+    subroutine model_info(modeldata,vmodel,rdep)
     implicit none
     
     character(len=*),intent(in) :: modeldata
+    real*8,intent(in) :: rdep
     type(Velocity),intent(out) :: vmodel
     
     character*80 :: buffer
     integer :: nlayer,i,status
     real*8 :: rho
+    real*8, allocatable :: z(:), vp(:), vs(:)
+    integer :: iloc, nlayer0
     
-    open(10,file=modeldata,status='old',iostat=status)
-    if (status /= 0) then
-        print *, 'Unable to open file :', modeldata
-        close(10)
-        return
-    end if
-    
+    open(10,file=modeldata)
     nlayer = 0
     do while(.true.)
         read(10,fmt='(a80)',iostat=status) buffer
@@ -68,18 +65,42 @@ module raytracing
     end do
     close(10)
     
-    vmodel%nlayer = nlayer
-    allocate(vmodel%z(nlayer))
-    allocate(vmodel%h(nlayer))
-    allocate(vmodel%vp(nlayer))
-    allocate(vmodel%vs(nlayer))
+    !vmodel%nlayer = nlayer
+    !allocate(vmodel%z(nlayer))
+    !allocate(vmodel%h(nlayer))
+    !allocate(vmodel%vp(nlayer))
+    !allocate(vmodel%vs(nlayer))
     
+    allocate(z(nlayer))
+    allocate(vp(nlayer))
+    allocate(vs(nlayer))
     open(10,file=modeldata)
     do i=1,nlayer
-        read(10,*) vmodel%z(i),vmodel%vs(i),vmodel%vp(i),rho
+        !read(10,*) vmodel%z(i),vmodel%vs(i),vmodel%vp(i),rho
+        read(10,*) z(i),vs(i),vp(i),rho
     end do
     close(10)
     
+    iloc = 1
+    do i=2,nlayer
+        if (rdep < z(i)) then
+            iloc = i-1
+            exit
+        end if
+    end do
+
+    nlayer0 = nlayer - iloc + 1
+    
+    vmodel%nlayer = nlayer0
+    allocate(vmodel%z(nlayer0))
+    allocate(vmodel%h(nlayer0))
+    allocate(vmodel%vp(nlayer0))
+    allocate(vmodel%vs(nlayer0))
+    vmodel%z = z(iloc:nlayer)-rdep
+    vmodel%z(1) = 0
+    vmodel%vp = vp(iloc:nlayer)
+    vmodel%vs = vs(iloc:nlayer)
+        
     vmodel%h = 0.0
     do i=1,nlayer-1
         vmodel%h(i) = vmodel%z(i+1)-vmodel%z(i)
@@ -112,7 +133,7 @@ module raytracing
     end if
     
     ! for source on the ground
-    if ((s == 0) .and. (zs == 0.0)) then
+    if ((s == 1) .and. (zs == 0.0)) then
         p = 1/0.0
         atime = theta/v(1)
         return
